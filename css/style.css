@@ -1,0 +1,115 @@
+#header{
+    text-align: center;
+    font-size: 43px;
+    font-weight: bold;
+}
+
+#remove {
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 5px 8px 5px 10px;
+}
+
+#remove:hover {
+    background-color: rgb(255, 0, 0);
+    color: white;
+}
+  
+
+#addBtn{
+    margin-left: 5px;
+    height: 30px;
+    width: 60px;;
+}
+  
+#addBtn:hover {
+    background-color: green;
+    color: white;
+}
+
+#delBtn {
+    height: 30px;
+    margin-left: 5px;
+    width: 130px;
+}
+
+#delBtn:hover {
+    background-color: red;
+    color: white;
+}
+
+
+
+ul li #tick:checked + span {
+    color: rgb(255, 0, 0);
+    text-decoration: line-through;
+}
+
+.main{
+      margin: auto;
+      border-style: solid;
+      height:430px;
+      width: 430px;
+      background-color: rgb(124, 196, 196);
+}
+
+.inputField {
+    margin-left: 5px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    height: 30px;
+}
+
+.actions{
+    padding:5px;
+}
+
+.storage {
+    margin-left: 20px;
+    padding: 5px;
+}
+
+.todoList {
+    margin-top: 20px;
+    margin-left: 5px;
+    padding: 0;
+    margin-right: 5px;
+}
+
+.todoList li {
+    position: relative;
+    padding: 5px 8px 1px 10px;
+    list-style-type: none;
+    background: rgba(205, 69, 223, 0);
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.todoList li:hover {
+    background: rgb(255, 255, 255)
+}
+   
+.todoList{
+    overflow-y: scroll;
+    height: 290px;
+    width: 95%;
+    margin-left: 14px;
+}
+
+.todoList::-webkit-scrollbar {
+    display: none;
+}
+
+.alltasks{
+    font-size: 25px;
+    margin: auto;
+    margin-top: 10px;
+    width:550px;
+ }
+ 
+ #note{
+     margin-left: 1px;
+     color: rgb(0, 0, 0);
+     font-size: 22px;
+ }
