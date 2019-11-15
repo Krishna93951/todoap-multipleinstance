@@ -1,146 +1,98 @@
-function App(storageKey, viewInstance, modalInstance) {
+function App(viewInstance, modalInstance) {
   var this_ = this;
-  this.key = storageKey;
+  // this.key = storageKey;
   this.view = viewInstance;
   this.modal = modalInstance;
+  this.root = this_.view.rootElement;
+  this.selectedOption = this_.view.getStorageType();
+}
 
-  this.init = function () {
-    this_.view.emptyList();
-    this_.addButtonEvent();
-    this_.selectStorageType();
-    this_.deleteCompletedButtonEvent();
-    this_.attachEvents();
-  };
+App.prototype = {
+  init: function () {
+    this.view.displayTasks(this.modal.getData(this.selectedOption));
+    this.selectStorageType();
+    this.tasksCount();
+    this.deleteCompletedButtonEvent();
+    this.attachEvents();
+    this.addButtonEvent();
+    this.attachCheckboxEvent();
+    this.deleteItemEvent();
+  },
 
-  this.createStorageInstance = function () {
-    var selectedOption = this_.view.rootElement.querySelector('.storage').value;
-    var storage = {
-      key: this.key,
-      LocalStorage: "LocalStorage",
-      SessionStorage: "SessionStorage"
-    };
-    return new StorageManager(storage[selectedOption], storage.key);
-  };
-
-  this.storeData = function (taskData) {
-    this_.createStorageInstance().setData(taskData);
-  };
-
-  this.getData = function () {
-    return this_.createStorageInstance().getData();
-  };
-
-  this.attachEvents = function () {
-    this_.view.rootElement.querySelector('.inputField').addEventListener("keypress", function (e) {
+  attachEvents: function () {
+    var this_ = this;
+    this_.root.addEventListener('keypress', function (e) {
       if (e.keyCode === 13) {
         this_.addTasksToList();
       }
     });
-  };
+  },
 
-  this.onSelectionOfStorageType = function () {
-    this_.view.displayTasks(taskData = this_.getData());
-    this_.view.clearAndFocusTextField();
-    this_.tasksCount();
-    
-    this_.attachCheckboxEvent();
-    this_.deleteItemEvent();
-    this_.createStorageInstance();
-  };
+  onSelectionOfStorageType: function () {
+    this.view.clearAndFocusTextField();
+    this.modal.createStorageInstance();
+    // this_.modal.createStorageInstance();
+  },
 
-  this.addTasksToList = function () {
+  toggleStatus: function (e) {
+    this.modal.toggleStatus(e, this.selectedOption);
+    this.tasksCount();
+  },
+
+  deleteTaskFromList: function (e) {
+    var itemId = Number(e.detail.id);
+    e.detail.name.remove();
+    this.modal.updateStorage(itemId, this.selectedOption);
+    this.tasksCount();
+  },
+
+  addTasksToList: function () {
     var id = Date.now();
+    var inputField = this.view.textField.value;
     var notifyMessage = {
-      inputField: "Enter Valid Input"
+      invalidInput: "Enter Valid Input"
     };
-    var todo = this_.view.rootElement.querySelector('.inputField');
-    var inputField = todo.value;
     if (inputField === "") {
-      alert(notifyMessage.inputField);
-    } else {
-      var taskData = this_.getData();
-      this_.modal.addTasksToStorage(inputField, taskData);
-      this_.view.createListElements(id, inputField);
-      this_.storeData(taskData);
-      this_.view.clearAndFocusTextField();
-      this_.tasksCount();
+      alert(notifyMessage.invalidInput);
     }
-  };
-
-  this.deleteTaskFromList = function (e) {
-    var itemId = e.target.previousSibling.id;
-    e.target.parentNode.remove();
-    this_.updateStorage(itemId);
-    this_.tasksCount();
-  };
-
-  this.updateStorage = function (itemId) {
-    var taskData = this_.getData();
-    var deleteObject = taskData.findIndex(function (element) {
-      return element.id === Number(itemId);
-    });
-    taskData.splice(deleteObject, 1);
-    this_.storeData(taskData)
-  };
-
-  this.toggleStatus = function (e, todos) {
-    var taskData = this_.getData();
-    var uniqueId = e.target.nextSibling.id;
-    var selectedItem = taskData.findIndex(function (element) {
-      return element.id === Number(uniqueId);
-    });
-    taskData[selectedItem].status = !taskData[selectedItem].status;
-    this_.storeData(taskData)
-    this_.tasksCount();
-  };
-
-  this.deleteCompleted = function () {
-    var taskData = this_.getData()
-    for (var i = taskData.length - 1; i >= 0; i--) {
-      if (taskData[i].status === true) {
-        taskData.splice(i, 1);
-      }
+    else {
+      var taskData = this.modal.getData(this.selectedOption);
+      this.modal.addTasksToStorage(inputField, taskData);
+      this.view.createListElements(id, inputField);
+      this.view.clearAndFocusTextField();
+      this.modal.storeData(taskData, this.selectedOption);
+      this.tasksCount();
     }
-    this_.storeData(taskData)
-    this_.view.displayTasks(taskData)
-    this_.tasksCount();
-  }
-}
+  },
 
-App.prototype = {
+  delCompleted: function () {
+    this.view.displayTasks(this.modal.deleteCompleted(this.selectedOption))
+    this.tasksCount();
+  },
+
   tasksCount: function () {
-    var list = this.view.rootElement.querySelector('.todoList');
-    // this.modal.taskData;
-    var taskData = this.getData();
-    var checkbox = list.querySelectorAll('input[type="checkbox"]:checked');
-    var pending;
-    var checkedCount = 0;
-    for (var i = 0; i < checkbox.length; i++) {
-      checkboxCount = checkbox[i].checked ? checkedCount++ : checkedCount--;
-    }
-    pending = taskData.length - checkedCount;
-    this.view.totalMsg(checkedCount, pending, taskData);
+    var getTasksCount = this.modal.taskCount(this.selectedOption);
+    this.view.totalTaskCount(getTasksCount.completedTasks, getTasksCount.pendingTasks, getTasksCount.allTasks);
   },
 
   attachCheckboxEvent: function () {
-    this.view.rootElement.addEventListener('checkbox', this.toggleStatus);
+    this.root.addEventListener('onCheckbox', this.toggleStatus.bind(this));
   },
 
   selectStorageType: function () {
-    this.view.rootElement.addEventListener('onstroageSelection', this.onSelectionOfStorageType);
+    this.root.addEventListener('onStroageSelection', this.onSelectionOfStorageType.bind(this));
   },
 
   addButtonEvent: function () {
-    this.view.rootElement.addEventListener('add', this.addTasksToList);
+    this.root.addEventListener('onAdd', this.addTasksToList.bind(this));
   },
 
   deleteCompletedButtonEvent: function () {
-    this.view.rootElement.addEventListener('deleteCompleted', this.deleteCompleted);
+    this.root.addEventListener('deleteCompleted', this.delCompleted.bind(this));
   },
 
   deleteItemEvent: function () {
-    // var todolist = this_.view.rootElement.querySelector('.todoList');
-    this.view.rootElement.addEventListener('deleteItem', this.deleteTaskFromList);
+    this.root.addEventListener('deleteItem', this.deleteTaskFromList.bind(this));
   }
 
 }

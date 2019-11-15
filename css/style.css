@@ -39,9 +39,7 @@
     color: white;
 }
 
-
-
-ul li #tick:checked + span {
+#tick:checked + span {
     color: rgb(255, 0, 0);
     text-decoration: line-through;
 }

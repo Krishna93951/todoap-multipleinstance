@@ -6,11 +6,11 @@
 </head>
 
 <body>
-    <div id="root" >
+    <div id="root">
     </div>
-    <div id="root1" >
+    <div id="root1">
     </div>
-    <div id="root2" >
+    <div id="root2">
     </div>
 
 </body>
@@ -20,15 +20,15 @@
 <script src="src/view.js"></script>
 <script src="src/controller.js"></script>
 <script>
-    function Todo(storageKey,rootElementId) {
-       return  new App(storageKey,new View(rootElementId),new Modal());
+    function Todo(storageKey, rootElementId, defaultStorage) {
+        return new App(new View(rootElementId, defaultStorage), new Modal(storageKey));
     }
-    (function(){var app1 = new Todo("myStorage",'#root');
-    app1.init();
-    var app2 = new Todo("todoKK19",'#root1');
-    app2.init();
-    var app3 = new Todo("todoKK12",'#root2');
-    app3.init();})();
+    (function () {
+        new Todo("myStorage", '#root', 'LocalStorage').init();
+        new Todo("todoKK19", '#root1', 'LocalStorage').init();
+    })();
+    // var app3 = new Todo("todoKK12",'#root2');
+    // app3.init();})();
 </script>
 
 </html>
