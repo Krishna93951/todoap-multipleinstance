@@ -1,32 +1,30 @@
 <html>
 
 <head>
-    <title>My Todo List</title>
-    <link rel="stylesheet" href="./css/style.css">
+	<title>My Todo List</title>
+	<link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-    <div id="root">
-    </div>
-    <div id="root1">
-    </div>
-    <div id="root2">
-    </div>
+	<div id="root">
+	</div>
+	<div id="root1">
+	</div>
+	<!-- <div id="root2">
+    </div> -->
 
 </body>
-<script src="src/modal.js"></script>
+<script src="src/model.js"></script>
 <script src="src/manager.js"></script>
 <script src="utility/polyfill.js"></script>
 <script src="src/view.js"></script>
 <script src="src/controller.js"></script>
 <script>
-    function Todo(storageKey, rootElementId, defaultStorage) {
-        return new App(new View(rootElementId, defaultStorage), new Modal(storageKey));
+	function Todo(storageKey, rootElementId) {
+        return new App(new View(rootElementId), new Modal(storageKey));
     }
-    (function () {
-        new Todo("myStorage", '#root', 'LocalStorage').init();
-        new Todo("todoKK19", '#root1', 'LocalStorage').init();
-    })();
+    new Todo("myStorage", '#root').init();
+    new Todo("todoKK19", '#root1').init();
     // var app3 = new Todo("todoKK12",'#root2');
     // app3.init();})();
 </script>
