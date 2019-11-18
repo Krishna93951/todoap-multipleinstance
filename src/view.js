@@ -1,131 +1,236 @@
-function View(rootElementId, defaultStorage) {
-    var _this = this;
-    this.countMessage = {
-        all: "All Tasks: ",
-        completed: " / Number of Completed Tasks: ",
-        pending: " / Number of Pending Tasks: "
-    };
-    this.defaultStorage = defaultStorage;
-
-    this.rootElement = document.querySelector(rootElementId);
-
-    this.mainContainer = this.createElements('div', { class: 'main' });
-    this.app = _this.rootElement;
-    this.title = this.createElements('p', { id: 'header' });
-    this.titleText = this.customCreateTextNode("My Todo List");
-    this.title.append(this.titleText);
-    this.taskCount = this.createElements('p', { class: 'allTasks' });
-    this.app.append(this.title, this.mainContainer, this.taskCount);
-    this.actions = this.createElements('div', { class: 'actions' });
-    this.textField = this.createElements('input', { class: ' inputField', maxlength: '40', placeholder: 'Enter yout Todo ....' });
-    this.dropdown = this.createElements('select', { class: 'storage' });
-    this.options = ['LocalStorage', 'SessionStorage'];
-    for (var i = 0; i < this.options.length; i++) {
-        this.option = this.createElements('option', { value: this.options[i] })
-        this.optionText = this.customCreateTextNode(this.options[i])
-        this.option.append(this.optionText)
-        this.dropdown.appendChild(this.option);
-    }
-    var dropdownEvent = new CustomEvent('onStroageSelection', { detail: { value: this.dropdown } });
-    this.dropdown.addEventListener('change', function () {
-        _this.rootElement.dispatchEvent(dropdownEvent);
-    })
-    this.addButton = this.createElements('button', { id: 'addBtn' });
-    this.addButtonText = this.customCreateTextNode("Add");
-    this.addButton.append(this.addButtonText);
-    var addButtonEvent = new Event('onAdd');
-    this.addButton.addEventListener('click', function () {
-        _this.rootElement.dispatchEvent(addButtonEvent);
-    })
-    this.actions.append(this.textField, this.dropdown, this.addButton);
-    this.todoListWrapper = this.createElements('div', { class: 'todoListContainer' });
-    this.todoList = this.createElements('ul', { class: 'todoList' });
-    this.todoListWrapper.append(this.todoList);
-    this.deleteCompletedTasks = this.createElements('button', { id: 'delBtn' });
-    this.deleteCompletedTasks.innerText = "Delete Completed";
-    var deleteCompletedTaskEvent = new Event('deleteCompleted');
-    this.deleteCompletedTasks.addEventListener('click', function () {
-        _this.rootElement.dispatchEvent(deleteCompletedTaskEvent);
-    })
-    this.mainContainer.append(this.actions, this.todoListWrapper, this.deleteCompletedTasks);
+function View(rootElementId) {
+  this.rootElement = document.querySelector(rootElementId);
 }
-
 
 View.prototype = {
+  countMessage: {
+    all: "All Tasks: ",
+    completed: " / Number of Completed Tasks: ",
+    pending: " / Number of Pending Tasks: "
+  },
 
-    createListElements: function (id, input, status) {
-        var li = this.createElements('li', { class: 'listItem', id: id });
-        this.createCheckbox(li, status);
-        this.createTask(li, input, id);
-        this.createDeleteButton(li);
-        this.todoList.append(li);
-    },
+  initialization: function() {
+    this.createTitle();
+    this.createAppContainer();
+    this.appendToRootElement();
+  },
 
-    createCheckbox: function (li, status) {
-        var selectionBox = this.createElements('input', { id: 'tick', type: 'checkbox', class: 'tick' });
-        var myEvent = new CustomEvent('onCheckbox', { detail: { id: li.id } });
-        selectionBox.checked = status;
-        selectionBox.addEventListener('change', function () {
-            this.rootElement.dispatchEvent(myEvent);
-        }.bind(this))
-        li.append(selectionBox);
+  createAppContainer: function() {
+    var appContainer = this.createElements("div", { class: "main" });
+    this.appendToAppContainer(appContainer);
+    return appContainer;
+  },
 
-    },
+  appendToAppContainer: function(appContainer) {
+    appContainer.append(
+      this.createActionsContainer(),
+      this.todoList(),
+      this.createDeleteButton()
+    );
+  },
 
-    createTask: function (li, inputField, id) {
-        var spanElement = this.createElements('span', { id: id });
-        var item = this.customCreateTextNode(inputField);
-        spanElement.appendChild(item);
-        li.append(spanElement);
-    },
+  createTitle: function() {
+    var title = this.createElements("p", { id: "header" });
+    title.innerText = "To-do List";
+    return title;
+  },
 
-    createDeleteButton: function (li) {
-        var _this = this;
-        var deleteButton = this.createElements('button', { id: 'remove' });
-        var deleteButtonText = this.customCreateTextNode("Del");
-        var event = new CustomEvent('deleteItem', { detail: { id: li.id, name: li } });
-        deleteButton.appendChild(deleteButtonText);
-        deleteButton.addEventListener('click', function () {
-            _this.rootElement.dispatchEvent(event);
-        })
-        li.append(deleteButton);
-    },
+  taskCount: function() {
+    return this.createElements("p", { class: "allTasks" });
+  },
 
-    createElements: function (elemnt, attribute) {
-        var element = document.createElement(elemnt, attribute);
-        for (var i in attribute) {
-            element.setAttribute(i, attribute[i]);
-        }
-        return element
-    },
+  createActionsContainer: function() {
+    var actions = this.createElements("div", { class: "actions" });
+    this.appendToActionsContainer(actions);
+    return actions;
+  },
 
-    customCreateTextNode: function (ele) {
-        return document.createTextNode(ele);
-    },
+  inputField: function() {
+    return this.createElements("input", {
+      class: " inputField",
+      maxlength: "40",
+      placeholder: "Enter yout Todo ...."
+    });
+  },
 
-    clearAndFocusTextField: function () {
-        var todo = this.textField;
-        todo.value = "";
-        todo.focus();
-    },
+  createDropdown: function() {
+    var dropdown = this.createElements("select", { class: "storage" });
+    this.appendOptionsToDropdown(dropdown);
+    this.attachEventToDropdown(dropdown);
+    return dropdown;
+  },
 
-    totalTaskCount: function (checkedCount, pending, taskData) {
-        return this.taskCount.innerText = this.countMessage.all + taskData.length + " " + this.countMessage.completed + checkedCount + " " + this.countMessage.pending + pending;
-    },
-
-    displayTasks: function (taskData) {
-        this.todoList.innerText = '';
-        for (i = 0; i < taskData.length; i++) {
-            this.createListElements(taskData[i].id, taskData[i].name, taskData[i].status);
-        }
-    },
-
-    getStorageType: function () {
-        return this.dropdown.value;
-    },
-
-    getInputFieldValue: function () {
-        return this.textField.value;
+  appendOptionsToDropdown: function(dropdown) {
+    var options = ["LocalStorage", "SessionStorage"];
+    for (var i = 0; i < options.length; i++) {
+      var option = this.createElements("option", { value: options[i] });
+      option.innerText = options[i];
+      dropdown.appendChild(option);
     }
+  },
 
-}
+  attachEventToDropdown: function(dropdown) {
+    var _this = this;
+    var dropdownEvent = new Event("onStorageChange");
+    dropdown.addEventListener("change", function() {
+      _this.rootElement.dispatchEvent(dropdownEvent);
+    });
+  },
+
+  createAddButton: function() {
+    var addButton = this.createElements("button", { id: "addBtn" });
+    addButton.innerText = "Add";
+    this.attachEventToAddButton(addButton);
+    return addButton;
+  },
+
+  attachEventToAddButton: function(addButton) {
+    var _this = this;
+    var addButtonEvent = new Event("onClickOfAdd");
+    addButton.addEventListener("click", function() {
+      _this.rootElement.dispatchEvent(addButtonEvent);
+    });
+  },
+
+  appendToActionsContainer: function(actions) {
+    actions.append(
+      this.inputField(),
+      this.createAddButton(),
+      this.createDropdown()
+    );
+  },
+
+  todoList: function() {
+    return this.createElements("ul", { class: "todoList" });
+  },
+
+  createDeleteButton: function() {
+    var deleteCompletedTasks = this.createElements("button", { id: "delBtn" });
+    deleteCompletedTasks.innerText = "Delete Completed ";
+    this.attachEventToDeleteButton(deleteCompletedTasks);
+    return deleteCompletedTasks;
+  },
+
+  attachEventToDeleteButton: function(deleteCompletedTasks) {
+    var _this = this;
+    var deleteEvent = new Event("onCompletedTasks");
+    deleteCompletedTasks.addEventListener("click", function() {
+      _this.rootElement.dispatchEvent(deleteEvent);
+    });
+  },
+
+  appendToRootElement: function() {
+    var _this = this;
+    _this.rootElement.append(
+      this.createTitle(),
+      this.createAppContainer(),
+      this.taskCount()
+    );
+  },
+
+  createListElements: function(id, input, status) {
+    var li = this.createElements("li", { class: "listItem" });
+    this.appendListItemToList(li, id, input, status);
+  },
+
+  appendListItemToList: function(li, id, input, status) {
+    var _this = this;
+    li.append(
+      this.createCheckbox(status, id),
+      this.createTask(input, id),
+      this.createTaskDeletionButton(li, id)
+    );
+    _this.rootElement.querySelector(".todoList").append(li);
+  },
+
+  createCheckbox: function(status, id) {
+    var selectionBox = this.createElements("input", {
+      id: "tick",
+      type: "checkbox",
+      class: "tick"
+    });
+    selectionBox.checked = status;
+    this.attachEventToCheckbox(selectionBox, id);
+    return selectionBox;
+  },
+
+  attachEventToCheckbox: function(selectionBox, id) {
+    var _this = this;
+    var checkboxEvent = new CustomEvent("onCheckbox", { detail: { id: id } });
+    selectionBox.addEventListener("change", function() {
+      _this.rootElement.dispatchEvent(checkboxEvent);
+    });
+  },
+
+  createTask: function(inputField, id) {
+    var spanElement = this.createElements("span", { id: id });
+    spanElement.innerText = inputField;
+    return spanElement;
+  },
+
+  createTaskDeletionButton: function(li, id) {
+    var deleteTask = this.createElements("button", { id: "remove" });
+    deleteTask.innerText = "Del";
+    this.attachEventToDeleteTask(li, deleteTask, id);
+    return deleteTask;
+  },
+
+  attachEventToDeleteTask: function(li, deleteTask, id) {
+    var _this = this;
+    var delTask = new CustomEvent("deleteItem", {
+      detail: { id: id, name: li }
+    });
+    deleteTask.addEventListener("click", function() {
+      _this.rootElement.dispatchEvent(delTask);
+    });
+  },
+
+  createElements: function(elemnt, attribute) {
+    var element = document.createElement(elemnt, attribute);
+    for (var i in attribute) {
+      element.setAttribute(i, attribute[i]);
+    }
+    return element;
+  },
+
+  clearAndFocusTextField: function() {
+    var _this = this;
+    var todo = _this.rootElement.querySelector(".inputField");
+    todo.value = "";
+    todo.focus();
+  },
+
+  totalTaskCount: function(checkedCount, pending, taskData) {
+    var _this = this;
+    return (_this.rootElement.querySelector(".allTasks").innerText =
+      this.countMessage.all +
+      taskData.length +
+      " " +
+      this.countMessage.completed +
+      checkedCount +
+      " " +
+      this.countMessage.pending +
+      pending);
+  },
+
+  displayTasks: function(taskData) {
+    var _this = this;
+    _this.rootElement.querySelector(".todoList").innerText = "";
+    for (i = 0; i < taskData.length; i++) {
+      this.createListElements(
+        taskData[i].id,
+        taskData[i].name,
+        taskData[i].status
+      );
+    }
+  },
+
+  getStorageType: function() {
+    return this.createDropdown().value;
+  },
+
+  getInputFieldValue: function() {
+    var _this = this;
+    return _this.rootElement.querySelector(".inputField").value;
+  }
+};
