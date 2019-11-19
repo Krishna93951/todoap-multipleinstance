@@ -3,49 +3,70 @@ function App(viewInstance, modalInstance) {
   this.view = viewInstance;
   this.modal = modalInstance;
   this.root = this_.view.rootElement;
-  this.selectedOption = this_.view.getStorageType();
 }
 
 App.prototype = {
+  selectedOption: function() {
+    return this.view.getStorageType();
+  },
+
   init: function() {
     this.view.initialization();
-    this.view.displayTasks(this.modal.getData(this.selectedOption));
-    this.selectStorageType();
-    this.tasksCount();
-    this.deleteCompletedButtonEvent();
+    this.view.displayTasks(this.modal.getData(this.selectedOption()));
+    this.handleCountingOfTasks();
     this.attachEvents();
-    this.addButtonEvent();
-    this.attachCheckboxEvent();
-    this.deleteItemEvent();
   },
 
   attachEvents: function() {
     var this_ = this;
     this_.root.addEventListener("keypress", function(e) {
       if (e.keyCode === 13) {
-        this_.addTasksToList();
+        this_.handleAddingOfTask();
       }
     });
+    this.root.addEventListener(
+      "onCheckbox",
+      this.handleTogglingOfStatus.bind(this)
+    );
+    this.root.addEventListener(
+      "onStorageChange",
+      this.onStorageSelection.bind(this)
+    );
+    this.root.addEventListener(
+      "onClickOfAdd",
+      this.handleAddingOfTask.bind(this)
+    );
+    this.root.addEventListener(
+      "onCompletedTasks",
+      this.handleDeletionOfCompletedTasks.bind(this)
+    );
+    this.root.addEventListener(
+      "deleteItem",
+      this.handleDeletionOfTask.bind(this)
+    );
   },
 
-  onSelectionOfStorageType: function() {
-    this.view.clearAndFocusTextField();
+  onStorageSelection: function() {
+    this.view.clearTextField();
+    this.view.displayTasks(this.modal.getData(this.selectedOption()));
     this.modal.createStorageInstance();
+    this.handleCountingOfTasks();
   },
 
-  deleteTaskFromList: function(e) {
+  handleDeletionOfTask: function(e) {
     var itemId = e.detail.id;
     e.detail.name.remove();
-    this.modal.updateStorage(itemId, this.selectedOption);
-    this.tasksCount();
+    this.modal.updateStorage(itemId, this.selectedOption());
+    this.handleCountingOfTasks();
   },
 
-  toggleStatus: function(e) {
-    this.modal.toggleStatus(e, this.selectedOption);
-    this.tasksCount();
+  handleTogglingOfStatus: function(e) {
+    var uniqueId = e.detail.id;
+    this.modal.toggleStatusInStorage(uniqueId, this.selectedOption());
+    this.handleCountingOfTasks();
   },
 
-  addTasksToList: function() {
+  handleAddingOfTask: function() {
     var id = Date.now().toString();
     var inputField = this.view.getInputFieldValue();
     var notifyMessage = {
@@ -54,53 +75,33 @@ App.prototype = {
     if (inputField === "") {
       alert(notifyMessage.invalidInput);
     } else {
-      this.modal.addTasksToStorage(id, inputField, this.selectedOption);
+      this.modal.addTasksToStorage(id, inputField, this.selectedOption());
       this.view.createListElements(id, inputField);
-      this.view.clearAndFocusTextField();
-      this.tasksCount();
+      this.view.clearTextField();
+      this.handleCountingOfTasks();
     }
   },
 
-  delCompleted: function() {
-    this.view.displayTasks(this.modal.deleteCompleted(this.selectedOption));
-    this.tasksCount();
-  },
-
-  tasksCount: function() {
-    var getTasksCount = this.modal.taskCount(this.selectedOption);
-    this.view.totalTaskCount(
-      getTasksCount.completedTasks,
-      getTasksCount.pendingTasks,
-      getTasksCount.allTasks
+  handleDeletionOfCompletedTasks: function() {
+    this.view.displayTasks(
+      this.modal.deleteCompletedTasksInStorage(this.selectedOption())
     );
+    this.handleCountingOfTasks();
   },
 
-  attachCheckboxEvent: function() {
-    this.root.addEventListener("onCheckbox", this.toggleStatus.bind(this));
-  },
-
-  selectStorageType: function() {
-    this.root.addEventListener(
-      "onStorageChange",
-      this.onSelectionOfStorageType.bind(this)
-    );
-  },
-
-  addButtonEvent: function() {
-    this.root.addEventListener("onClickOfAdd", this.addTasksToList.bind(this));
-  },
-
-  deleteCompletedButtonEvent: function() {
-    this.root.addEventListener(
-      "onCompletedTasks",
-      this.delCompleted.bind(this)
-    );
-  },
-
-  deleteItemEvent: function() {
-    this.root.addEventListener(
-      "deleteItem",
-      this.deleteTaskFromList.bind(this)
+  handleCountingOfTasks: function() {
+    var allTasks = this.modal.getData(this.selectedOption());
+    var completeTasksCount = 0;
+    for (var i = 0; i < allTasks.length; i++) {
+      if (allTasks[i].status === true) {
+        completeTasksCount++;
+      }
+    }
+    var pendingTasksCount = allTasks.length - completeTasksCount;
+    this.view.displayTotalTasksCount(
+      allTasks,
+      completeTasksCount,
+      pendingTasksCount
     );
   }
 };

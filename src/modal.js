@@ -23,15 +23,6 @@ function Modal(storageKey) {
 }
 
 Modal.prototype = {
-  createStorageInstance: function(selectedOption) {
-    var storage = {
-      key: this.key,
-      LocalStorage: "LocalStorage",
-      SessionStorage: "SessionStorage"
-    };
-    return new StorageManager(storage[selectedOption], storage.key);
-  },
-
   getData: function(selectedOption) {
     return this.createStorageInstance(selectedOption).getData();
   },
@@ -43,14 +34,14 @@ Modal.prototype = {
   addTasksToStorage: function(id, inputField, selectedOption) {
     var taskData = this.getData(selectedOption);
     taskData.push({
-      id: id.toString(),
+      id: id,
       name: inputField,
       status: false
     });
     this.storeData(taskData, selectedOption);
   },
 
-  deleteCompleted: function(selectedOption) {
+  deleteCompletedTasksInStorage: function(selectedOption) {
     var taskData = this.getData(selectedOption);
     taskData = taskData.filter(function(elem) {
       return elem.status !== true;
@@ -59,11 +50,10 @@ Modal.prototype = {
     return taskData;
   },
 
-  toggleStatus: function(e, selectedOption) {
-    var uniqueId = e.detail.id;
+  toggleStatusInStorage: function(uniqueId, selectedOption) {
     var taskData = this.getData(selectedOption);
-    var selectedItem = taskData.findIndex(function(element) {
-      return element.id === uniqueId;
+    var selectedItem = taskData.findIndex(function(todo) {
+      return todo.id === uniqueId;
     });
     taskData[selectedItem].status = !taskData[selectedItem].status;
     this.storeData(taskData, selectedOption);
@@ -71,25 +61,19 @@ Modal.prototype = {
 
   updateStorage: function(itemId, selectedOption) {
     var taskData = this.getData(selectedOption);
-    var deleteObject = taskData.findIndex(function(element) {
-      console.log(element.id);
-      return element.id === itemId;
+    var deleteObject = taskData.findIndex(function(todo) {
+      return todo.id === itemId;
     });
     taskData.splice(deleteObject, 1);
     this.storeData(taskData, selectedOption);
   },
-  taskCount: function(selectedOption) {
-    var taskData = this.getData(selectedOption);
-    var checkedCount = 0;
-    for (var i = 0; i < taskData.length; i++) {
-      if (taskData[i].status === true) {
-        checkedCount++;
-      }
-    }
-    return {
-      allTasks: taskData,
-      completedTasks: checkedCount,
-      pendingTasks: taskData.length - checkedCount
+
+  createStorageInstance: function(selectedOption) {
+    var storage = {
+      key: this.key,
+      LocalStorage: "LocalStorage",
+      SessionStorage: "SessionStorage"
     };
+    return new StorageManager(storage[selectedOption], storage.key);
   }
 };

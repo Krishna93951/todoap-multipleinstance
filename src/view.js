@@ -5,48 +5,46 @@ function View(rootElementId) {
 View.prototype = {
   countMessage: {
     all: "All Tasks: ",
-    completed: " / Number of Completed Tasks: ",
-    pending: " / Number of Pending Tasks: "
+    completed: " / Completed Tasks: ",
+    pending: " / Pending Tasks: "
   },
 
   initialization: function() {
-    this.createTitle();
-    this.createAppContainer();
-    this.appendToRootElement();
+    this.appendAppToRootElement();
   },
 
   createAppContainer: function() {
-    var appContainer = this.createElements("div", { class: "main" });
-    this.appendToAppContainer(appContainer);
+    var appContainer = this.createElement("div", { class: "main" });
+    this.appendAppElementsToAppContainer(appContainer);
     return appContainer;
   },
 
-  appendToAppContainer: function(appContainer) {
+  appendAppElementsToAppContainer: function(appContainer) {
     appContainer.append(
       this.createActionsContainer(),
-      this.todoList(),
+      this.createToDoList(),
       this.createDeleteButton()
     );
   },
 
   createTitle: function() {
-    var title = this.createElements("p", { id: "header" });
+    var title = this.createElement("p", { id: "header" });
     title.innerText = "To-do List";
     return title;
   },
 
-  taskCount: function() {
-    return this.createElements("p", { class: "allTasks" });
+  createTaskCountSpace: function() {
+    return this.createElement("p", { class: "allTasks" });
   },
 
   createActionsContainer: function() {
-    var actions = this.createElements("div", { class: "actions" });
-    this.appendToActionsContainer(actions);
+    var actions = this.createElement("div", { class: "actions" });
+    this.appendActionElementsToActionsContainer(actions);
     return actions;
   },
 
-  inputField: function() {
-    return this.createElements("input", {
+  createInputField: function() {
+    return this.createElement("input", {
       class: " inputField",
       maxlength: "40",
       placeholder: "Enter yout Todo ...."
@@ -54,7 +52,7 @@ View.prototype = {
   },
 
   createDropdown: function() {
-    var dropdown = this.createElements("select", { class: "storage" });
+    var dropdown = this.createElement("select", { class: "storage" });
     this.appendOptionsToDropdown(dropdown);
     this.attachEventToDropdown(dropdown);
     return dropdown;
@@ -63,7 +61,7 @@ View.prototype = {
   appendOptionsToDropdown: function(dropdown) {
     var options = ["LocalStorage", "SessionStorage"];
     for (var i = 0; i < options.length; i++) {
-      var option = this.createElements("option", { value: options[i] });
+      var option = this.createElement("option", { value: options[i] });
       option.innerText = options[i];
       dropdown.appendChild(option);
     }
@@ -78,7 +76,7 @@ View.prototype = {
   },
 
   createAddButton: function() {
-    var addButton = this.createElements("button", { id: "addBtn" });
+    var addButton = this.createElement("button", { id: "addBtn" });
     addButton.innerText = "Add";
     this.attachEventToAddButton(addButton);
     return addButton;
@@ -92,20 +90,20 @@ View.prototype = {
     });
   },
 
-  appendToActionsContainer: function(actions) {
+  appendActionElementsToActionsContainer: function(actions) {
     actions.append(
-      this.inputField(),
+      this.createInputField(),
       this.createAddButton(),
       this.createDropdown()
     );
   },
 
-  todoList: function() {
-    return this.createElements("ul", { class: "todoList" });
+  createToDoList: function() {
+    return this.createElement("ul", { class: "todoList" });
   },
 
   createDeleteButton: function() {
-    var deleteCompletedTasks = this.createElements("button", { id: "delBtn" });
+    var deleteCompletedTasks = this.createElement("button", { id: "delBtn" });
     deleteCompletedTasks.innerText = "Delete Completed ";
     this.attachEventToDeleteButton(deleteCompletedTasks);
     return deleteCompletedTasks;
@@ -119,21 +117,21 @@ View.prototype = {
     });
   },
 
-  appendToRootElement: function() {
+  appendAppToRootElement: function() {
     var _this = this;
     _this.rootElement.append(
       this.createTitle(),
       this.createAppContainer(),
-      this.taskCount()
+      this.createTaskCountSpace()
     );
   },
 
   createListElements: function(id, input, status) {
-    var li = this.createElements("li", { class: "listItem" });
-    this.appendListItemToList(li, id, input, status);
+    var li = this.createElement("li", { class: "listItem" });
+    this.appendItemsToList(li, id, input, status);
   },
 
-  appendListItemToList: function(li, id, input, status) {
+  appendItemsToList: function(li, id, input, status) {
     var _this = this;
     li.append(
       this.createCheckbox(status, id),
@@ -144,7 +142,7 @@ View.prototype = {
   },
 
   createCheckbox: function(status, id) {
-    var selectionBox = this.createElements("input", {
+    var selectionBox = this.createElement("input", {
       id: "tick",
       type: "checkbox",
       class: "tick"
@@ -163,13 +161,13 @@ View.prototype = {
   },
 
   createTask: function(inputField, id) {
-    var spanElement = this.createElements("span", { id: id });
+    var spanElement = this.createElement("span", { id: id });
     spanElement.innerText = inputField;
     return spanElement;
   },
 
   createTaskDeletionButton: function(li, id) {
-    var deleteTask = this.createElements("button", { id: "remove" });
+    var deleteTask = this.createElement("button", { id: "remove" });
     deleteTask.innerText = "Del";
     this.attachEventToDeleteTask(li, deleteTask, id);
     return deleteTask;
@@ -185,7 +183,7 @@ View.prototype = {
     });
   },
 
-  createElements: function(elemnt, attribute) {
+  createElement: function(elemnt, attribute) {
     var element = document.createElement(elemnt, attribute);
     for (var i in attribute) {
       element.setAttribute(i, attribute[i]);
@@ -193,29 +191,42 @@ View.prototype = {
     return element;
   },
 
-  clearAndFocusTextField: function() {
+  clearTextField: function() {
     var _this = this;
-    var todo = _this.rootElement.querySelector(".inputField");
-    todo.value = "";
-    todo.focus();
+    var textField = _this.rootElement.querySelector(".inputField");
+    textField.value = "";
+    this.focusTextField(textField);
   },
 
-  totalTaskCount: function(checkedCount, pending, taskData) {
+  focusTextField: function(textField) {
+    // var textField = _this.rootElement.querySelector('.inputField');
+    textField.focus();
+  },
+
+  clearToDoList: function() {
+    var _this = this;
+    _this.rootElement.querySelector(".todoList").innerText = "";
+  },
+
+  displayTotalTasksCount: function(
+    allTasks,
+    completeTasksCount,
+    pendingTasksCount
+  ) {
     var _this = this;
     return (_this.rootElement.querySelector(".allTasks").innerText =
       this.countMessage.all +
-      taskData.length +
+      allTasks.length +
       " " +
       this.countMessage.completed +
-      checkedCount +
+      completeTasksCount +
       " " +
       this.countMessage.pending +
-      pending);
+      pendingTasksCount);
   },
 
   displayTasks: function(taskData) {
-    var _this = this;
-    _this.rootElement.querySelector(".todoList").innerText = "";
+    this.clearToDoList();
     for (i = 0; i < taskData.length; i++) {
       this.createListElements(
         taskData[i].id,
@@ -226,7 +237,8 @@ View.prototype = {
   },
 
   getStorageType: function() {
-    return this.createDropdown().value;
+    var _this = this;
+    return _this.rootElement.querySelector(".storage").value;
   },
 
   getInputFieldValue: function() {
