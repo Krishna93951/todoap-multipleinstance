@@ -6,6 +6,15 @@
     margin-bottom:10px;
 }
 
+.main{
+      margin: auto;
+      border-style: solid;
+      height:400px;
+      width: 410px;
+      background-color:blanchedalmond;
+}
+
+
 #remove {
     position: absolute;
     top: 1px;
@@ -39,19 +48,6 @@
 #delBtn:hover {
     background-color: red;
     color: white;
-}
-
-.tick:checked + span {
-    color: rgb(136, 0, 0);
-    text-decoration: line-through;
-}
-
-.main{
-      margin: auto;
-      border-style: solid;
-      height:400px;
-      width: 410px;
-      background-color:blanchedalmond;
 }
 
 .inputField {
@@ -93,20 +89,19 @@
     
 }
 
+.tick{
+    transform:scale(2);
+    margin:10px;
+}
+
+.tick:checked + span {
+    color: rgb(136, 0, 0);
+    text-decoration: line-through;
+}
+
 .alltasks{
     text-align: center;
     font-size: 25px;
     font-family: "Arial Black", Gadget, sans-serif;
     margin-top: 10px;
- }
-
- .tick{
-    transform:scale(2);
-    margin:10px;
- }
- 
- #note{
-     margin-left: 1px;
-     color: rgb(0, 0, 0);
-     font-size: 22px;
  }

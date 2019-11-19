@@ -24,26 +24,11 @@ App.prototype = {
         this_.handleAddingOfTask();
       }
     });
-    this.root.addEventListener(
-      "onCheckbox",
-      this.handleTogglingOfStatus.bind(this)
-    );
-    this.root.addEventListener(
-      "onStorageChange",
-      this.onStorageSelection.bind(this)
-    );
-    this.root.addEventListener(
-      "onClickOfAdd",
-      this.handleAddingOfTask.bind(this)
-    );
-    this.root.addEventListener(
-      "onCompletedTasks",
-      this.handleDeletionOfCompletedTasks.bind(this)
-    );
-    this.root.addEventListener(
-      "deleteItem",
-      this.handleDeletionOfTask.bind(this)
-    );
+    this.root.addEventListener("onCheckbox",this.handleTogglingOfStatus.bind(this));
+    this.root.addEventListener("onStorageChange",this.onStorageSelection.bind(this));
+    this.root.addEventListener("onClickOfAdd",this.handleAddingOfTask.bind(this));
+    this.root.addEventListener("onCompletedTasks",this.handleDeletionOfCompletedTasks.bind(this));
+    this.root.addEventListener("deleteItem",this.handleDeletionOfTask.bind(this));
   },
 
   onStorageSelection: function() {
@@ -83,9 +68,7 @@ App.prototype = {
   },
 
   handleDeletionOfCompletedTasks: function() {
-    this.view.displayTasks(
-      this.modal.deleteCompletedTasksInStorage(this.selectedOption())
-    );
+    this.view.displayTasks(this.modal.deleteCompletedTasksInStorage(this.selectedOption()));
     this.handleCountingOfTasks();
   },
 
@@ -98,10 +81,6 @@ App.prototype = {
       }
     }
     var pendingTasksCount = allTasks.length - completeTasksCount;
-    this.view.displayTotalTasksCount(
-      allTasks,
-      completeTasksCount,
-      pendingTasksCount
-    );
+    this.view.displayTotalTasksCount(allTasks,completeTasksCount,pendingTasksCount);
   }
 };
